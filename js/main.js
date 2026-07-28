@@ -15,10 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (MotionLib) {
     const { animate, inView, scroll } = MotionLib;
 
-    // 1. Top Scroll Progress Indicator
     scroll(animate(progressBar, { scaleX: [0, 1] }));
 
-    // 2. Target ALL key elements for Universal Viewport Fade-In
     const animateTargets = [
       '.badge-tag',
       '.hero-title',
@@ -51,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // 3. Floating Showcase Card subtle float animation
     const showcaseCard = document.querySelector('.showcase-frame');
     if (showcaseCard) {
       inView(showcaseCard, () => {
@@ -59,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 4. Spring Hover Animations on Pills & Buttons
     const interactiveElements = document.querySelectorAll('.home-circle, .nav-pill, .logo-badge');
     interactiveElements.forEach(btn => {
       btn.addEventListener('mouseenter', () => {
@@ -83,25 +79,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Auto-inject Mobile Drawer Menu if not in HTML
+  // Ensure Mobile Toggle Button Exists in Navbar Container
+  const navContainer = document.querySelector('.nav-container');
+  let menuToggle = document.querySelector('.menu-toggle');
+  if (!menuToggle && navContainer) {
+    menuToggle = document.createElement('button');
+    menuToggle.className = 'menu-toggle';
+    menuToggle.setAttribute('aria-label', 'Toggle Navigation Menu');
+    menuToggle.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <span style="font-size: 13px; font-weight: 700; font-family: var(--font-display);">Menu</span>
+    `;
+    navContainer.appendChild(menuToggle);
+  }
+
+  // Inject Mobile Menu Drawer if not present
   let mobileMenu = document.querySelector('.mobile-menu');
   if (!mobileMenu && navbar) {
     mobileMenu = document.createElement('div');
     mobileMenu.className = 'mobile-menu';
     
-    // Copy nav links from desktop navbar
     const activePath = window.location.pathname.split('/').pop() || 'index.html';
     mobileMenu.innerHTML = `
       <ul class="mobile-nav-links">
-        <li><a href="index.html" class="mobile-nav-link ${activePath === 'index.html' ? 'active' : ''}">Home</a></li>
-        <li><a href="about.html" class="mobile-nav-link ${activePath === 'about.html' ? 'active' : ''}">About</a></li>
-        <li><a href="products.html" class="mobile-nav-link ${activePath === 'products.html' ? 'active' : ''}">Products</a></li>
+        <li><a href="index.html" class="mobile-nav-link ${activePath === 'index.html' || activePath === '' ? 'active' : ''}">Home</a></li>
+        <li><a href="about.html" class="mobile-nav-link ${activePath === 'about.html' ? 'active' : ''}">About Us</a></li>
+        <li><a href="products.html" class="mobile-nav-link ${activePath === 'products.html' ? 'active' : ''}">Products Catalog</a></li>
         <li><a href="services.html" class="mobile-nav-link ${activePath === 'services.html' ? 'active' : ''}">Services</a></li>
         <li><a href="portfolio.html" class="mobile-nav-link ${activePath === 'portfolio.html' ? 'active' : ''}">Portfolio</a></li>
         <li><a href="faq.html" class="mobile-nav-link ${activePath === 'faq.html' ? 'active' : ''}">FAQ</a></li>
-        <li><a href="contact.html" class="mobile-nav-link ${activePath === 'contact.html' ? 'active' : ''}">Contact</a></li>
+        <li><a href="contact.html" class="mobile-nav-link ${activePath === 'contact.html' ? 'active' : ''}">Contact & Location</a></li>
       </ul>
-      <div style="margin-top: 24px; padding: 0 16px;">
+      <div style="margin-top: 20px; padding: 0 4px;">
         <a href="contact.html" class="home-circle" style="width: 100%; justify-content: center; padding: 14px; font-size: 15px;">
           Order Now &rarr;
         </a>
@@ -110,21 +121,34 @@ document.addEventListener('DOMContentLoaded', () => {
     navbar.appendChild(mobileMenu);
   }
 
-  // Mobile Menu Toggle Click Handler
-  const menuToggle = document.querySelector('.menu-toggle');
+  // Handle Mobile Menu Open/Close Toggling
   if (menuToggle && mobileMenu) {
     menuToggle.addEventListener('click', (e) => {
       e.stopPropagation();
-      mobileMenu.classList.toggle('open');
-      menuToggle.classList.toggle('active');
+      const isOpen = mobileMenu.classList.contains('open');
+      if (isOpen) {
+        mobileMenu.classList.remove('open');
+        menuToggle.classList.remove('active');
+      } else {
+        mobileMenu.classList.add('open');
+        menuToggle.classList.add('active');
+      }
     });
 
-    // Close mobile menu when clicking outside
+    // Close when clicking outside
     document.addEventListener('click', (e) => {
       if (!mobileMenu.contains(e.target) && !menuToggle.contains(e.target)) {
         mobileMenu.classList.remove('open');
         menuToggle.classList.remove('active');
       }
+    });
+
+    // Close when clicking any link inside mobile menu
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        menuToggle.classList.remove('active');
+      });
     });
   }
 
