@@ -41,10 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     animateTargets.forEach(selector => {
       const elements = document.querySelectorAll(selector);
       elements.forEach((el, index) => {
-        // Initial hidden style for smooth reveal
         el.classList.add('motion-fade');
-
-        // Viewport trigger using Motion inView
         inView(el, () => {
           animate(el, 
             { opacity: [0, 1], y: [24, 0] }, 
@@ -66,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const interactiveElements = document.querySelectorAll('.home-circle, .nav-pill, .logo-badge');
     interactiveElements.forEach(btn => {
       btn.addEventListener('mouseenter', () => {
-        animate(btn, { scale: 1.05 }, { duration: 0.2, easing: [0.34, 1.56, 0.64, 1] });
+        animate(btn, { scale: 1.04 }, { duration: 0.2, easing: [0.34, 1.56, 0.64, 1] });
       });
       btn.addEventListener('mouseleave', () => {
         animate(btn, { scale: 1 }, { duration: 0.2 });
@@ -86,19 +83,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Mobile Menu Toggle
+  // Auto-inject Mobile Drawer Menu if not in HTML
+  let mobileMenu = document.querySelector('.mobile-menu');
+  if (!mobileMenu && navbar) {
+    mobileMenu = document.createElement('div');
+    mobileMenu.className = 'mobile-menu';
+    
+    // Copy nav links from desktop navbar
+    const activePath = window.location.pathname.split('/').pop() || 'index.html';
+    mobileMenu.innerHTML = `
+      <ul class="mobile-nav-links">
+        <li><a href="index.html" class="mobile-nav-link ${activePath === 'index.html' ? 'active' : ''}">Home</a></li>
+        <li><a href="about.html" class="mobile-nav-link ${activePath === 'about.html' ? 'active' : ''}">About</a></li>
+        <li><a href="products.html" class="mobile-nav-link ${activePath === 'products.html' ? 'active' : ''}">Products</a></li>
+        <li><a href="services.html" class="mobile-nav-link ${activePath === 'services.html' ? 'active' : ''}">Services</a></li>
+        <li><a href="portfolio.html" class="mobile-nav-link ${activePath === 'portfolio.html' ? 'active' : ''}">Portfolio</a></li>
+        <li><a href="faq.html" class="mobile-nav-link ${activePath === 'faq.html' ? 'active' : ''}">FAQ</a></li>
+        <li><a href="contact.html" class="mobile-nav-link ${activePath === 'contact.html' ? 'active' : ''}">Contact</a></li>
+      </ul>
+      <div style="margin-top: 24px; padding: 0 16px;">
+        <a href="contact.html" class="home-circle" style="width: 100%; justify-content: center; padding: 14px; font-size: 15px;">
+          Order Now &rarr;
+        </a>
+      </div>
+    `;
+    navbar.appendChild(mobileMenu);
+  }
+
+  // Mobile Menu Toggle Click Handler
   const menuToggle = document.querySelector('.menu-toggle');
-  const mobileMenu = document.querySelector('.mobile-menu');
   if (menuToggle && mobileMenu) {
-    menuToggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('active');
+    menuToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileMenu.classList.toggle('open');
+      menuToggle.classList.toggle('active');
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!mobileMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        mobileMenu.classList.remove('open');
+        menuToggle.classList.remove('active');
+      }
     });
   }
 
   // Interactive Glass Card Mouse Tracking Radial Glow
   const cards = document.querySelectorAll('.glass-card');
   cards.forEach(card => {
-    card.addEventListener('mousemove', (e) => {
+    card.addEventListener('mousemove', e => {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
